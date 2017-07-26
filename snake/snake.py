@@ -8,6 +8,8 @@ HEIGHT = 500
 STEP = 20
 
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 dir_map = {'UP': (0, -STEP), 'DOWN': (0, STEP), 'RIGHT': (STEP, 0), 'LEFT': (-STEP, 0)}
 
@@ -19,7 +21,14 @@ def load_png(png):
         print("Can't load image.")
         raise SystemExit(err.args[0])
     image = image.convert_alpha()
-    return image, image.get_rect()
+    return image, image.get_rect()\
+
+def write(text, size, pos, color):
+    font = pygame.font.Font(None, size)
+    tx = font.render(text, True, color)
+    tx_rect = tx.get_rect()
+    tx_rect.center = pos
+    return tx, tx_rect
 
 
 class Segment(pygame.sprite.Sprite):
@@ -90,22 +99,15 @@ class Apple(pygame.sprite.Sprite):
         self.rect.topleft = (random.randrange(0, WIDTH, STEP), random.randrange(0, WIDTH, STEP))
 
 
-def main():
-    pygame.init()
-
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption('Snake')
+def game(screen, clock):
     screen_area = screen.get_rect()
 
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(WHITE)
 
-    clock = pygame.time.Clock()
-
     snake = Snake()
     apple = Apple([100, 100])
-
     snake_group = pygame.sprite.RenderUpdates(snake.segments)
     apple_group = pygame.sprite.RenderUpdates(apple)
 
@@ -153,5 +155,33 @@ def main():
         snake_group.draw(screen)
         pygame.display.flip()
 
+
+def play_again(screen):
+    background = pygame.Surface(screen.get_size())
+    background = background.convert()
+    background.fill(WHITE)
+    text1, text1r = write("Game over", 80, (250, 200), RED)
+    text3, text3r = write("Play again", 55, (250, 350), BLUE)
+    screen.blit(background, (0, 0))
+    screen.blit(text1, text1r)
+    screen.blit(text3, text3r)
+    pygame.display.flip()
+    while 1:
+        event = pygame.event.wait()
+        if event.type == QUIT:
+            return False
+        elif event.type == MOUSEBUTTONDOWN:
+            return True
+
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Snake')
+    clock = pygame.time.Clock()
+    while 1:
+        game(screen, clock)
+        if not play_again(screen):
+            return
 
 if __name__ == '__main__': main()
