@@ -9,6 +9,8 @@ STEP = 20
 
 WHITE = (255, 255, 255)
 
+dir_map = {'UP': (0, -STEP), 'DOWN': (0, STEP), 'RIGHT': (STEP, 0), 'LEFT': (-STEP, 0)}
+
 def load_png(png):
     fullname = os.path.join(png)
     try:
@@ -40,16 +42,28 @@ class Snake(object):
         self.segments.append(Segment([2*STEP,STEP]))
         self.segments.append(Segment([3*STEP,STEP]))
         self.segments.append(Segment([4*STEP,STEP]))
+        self.dir = 'RIGHT'
 
     def head_coord(self):
         return self.segments[len(self.segments)-1].coord()
 
     def newpos(self):
-        return [self.head_coord()[0] + STEP, self.head_coord()[1]]
+        return [self.head_coord()[0] + dir_map[self.dir][0], self.head_coord()[1] + dir_map[self.dir][1]]
+
+    def ok_turn(self, side):
+        if (self.dir == 'RIGHT' and side == 'LEFT') or \
+                (self.dir == 'LEFT' and side == 'RIGHT') or \
+                (self.dir == 'UP' and side == 'DOWN') or \
+                (self.dir == 'DOWN' and side == 'UP'):
+            return False
+        else:
+            return True
 
     def move(self):
         self.segments[0].change_pos(self.newpos())
         self.segments.append(self.segments.popleft())
+
+
 
 
 class Apple(pygame.sprite.Sprite):
@@ -82,9 +96,23 @@ def main():
 
     while 1:
         clock.tick(5)
+
+        new_dir = snake.dir
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
+            elif event.type == KEYDOWN:
+                if event.key == K_UP:
+                    new_dir = 'UP'
+                elif event.key == K_DOWN:
+                    new_dir = 'DOWN'
+                elif event.key == K_RIGHT:
+                    new_dir = 'RIGHT'
+                elif event.key == K_LEFT:
+                    new_dir = 'LEFT'
+
+        if snake.ok_turn(new_dir):
+            snake.dir = new_dir
 
         snake.move()
         screen.blit(background, (0, 0))
