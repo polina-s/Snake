@@ -1,4 +1,4 @@
-import os
+import os, random
 import pygame
 from pygame.locals import *
 from collections import deque
@@ -63,7 +63,10 @@ class Snake(object):
         self.segments[0].change_pos(self.newpos())
         self.segments.append(self.segments.popleft())
 
-
+    def grow(self):
+        new_segm = Segment(self.newpos())
+        self.segments.append(new_segm)
+        return new_segm
 
 
 class Apple(pygame.sprite.Sprite):
@@ -71,6 +74,12 @@ class Apple(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('apple.png')
         self.rect.topleft = xy
+
+    def coord(self):
+        return self.rect.topleft
+
+    def update(self):
+        self.rect.topleft = (random.randrange(0, WIDTH, STEP), random.randrange(0, WIDTH, STEP))
 
 
 def main():
@@ -88,10 +97,12 @@ def main():
     snake = Snake()
     apple = Apple([100, 100])
 
-    sprites = pygame.sprite.Group(snake.segments, apple)
+    snake_group = pygame.sprite.RenderUpdates(snake.segments)
+    apple_group = pygame.sprite.RenderUpdates(apple)
 
     screen.blit(background, (0, 0))
-    sprites.draw(screen)
+    apple_group.draw(screen)
+    snake_group.draw(screen)
     pygame.display.flip()
 
     while 1:
@@ -114,9 +125,15 @@ def main():
         if snake.ok_turn(new_dir):
             snake.dir = new_dir
 
-        snake.move()
+        if snake.head_coord() == apple.coord():
+            snake_group.add(snake.grow())
+            apple_group.update()
+        else:
+            snake.move()
+
         screen.blit(background, (0, 0))
-        sprites.draw(screen)
+        apple_group.draw(screen)
+        snake_group.draw(screen)
         pygame.display.flip()
 
 
