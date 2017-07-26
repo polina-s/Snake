@@ -114,8 +114,10 @@ def main():
     snake_group.draw(screen)
     pygame.display.flip()
 
+    speed = 5
+
     while 1:
-        clock.tick(5)
+        clock.tick(speed)
 
         new_dir = snake.dir
         for event in pygame.event.get():
@@ -138,6 +140,8 @@ def main():
             snake_group.add(snake.grow())
             while pygame.sprite.spritecollideany(apple, snake_group):
                 apple_group.update()
+            if len(snake.segments) % 5 == 0:
+                speed = speed + 1
         else:
             snake.move()
 
