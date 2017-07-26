@@ -68,6 +68,14 @@ class Snake(object):
         self.segments.append(new_segm)
         return new_segm
 
+    def self_crash(self):
+        n = len(self.segments)
+        for i in range(1, n):
+            for j in range(i+1, n):
+                if self.segments[i].rect.colliderect(self.segments[j].rect):
+                    return True
+        return False
+
 
 class Apple(pygame.sprite.Sprite):
     def __init__(self, xy):
@@ -87,6 +95,7 @@ def main():
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Snake')
+    screen_area = screen.get_rect()
 
     background = pygame.Surface(screen.get_size())
     background = background.convert()
@@ -131,6 +140,9 @@ def main():
                 apple_group.update()
         else:
             snake.move()
+
+        if snake.self_crash() or not screen_area.collidepoint(snake.head_coord()):
+            return
 
         screen.blit(background, (0, 0))
         apple_group.draw(screen)
