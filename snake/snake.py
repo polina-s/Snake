@@ -10,6 +10,7 @@ STEP = 20
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 dir_map = {'UP': (0, -STEP), 'DOWN': (0, STEP), 'RIGHT': (STEP, 0), 'LEFT': (-STEP, 0)}
 
@@ -117,6 +118,7 @@ def game(screen, clock):
     pygame.display.flip()
 
     speed = 5
+    score = 0
 
     while 1:
         clock.tick(speed)
@@ -124,7 +126,7 @@ def game(screen, clock):
         new_dir = snake.dir
         for event in pygame.event.get():
             if event.type == QUIT:
-                return
+                return score
             elif event.type == KEYDOWN:
                 if event.key == K_UP:
                     new_dir = 'UP'
@@ -148,7 +150,8 @@ def game(screen, clock):
             snake.move()
 
         if snake.self_crash() or not screen_area.collidepoint(snake.head_coord()):
-            return
+            score = (len(snake.segments) - 4) * 10
+            return score
 
         screen.blit(background, (0, 0))
         apple_group.draw(screen)
@@ -156,14 +159,16 @@ def game(screen, clock):
         pygame.display.flip()
 
 
-def play_again(screen):
+def play_again(screen, score):
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(WHITE)
-    text1, text1r = write("Game over", 80, (250, 200), RED)
+    text1, text1r = write("Game over", 80, (250, 150), RED)
+    text2, text2r = write("Your score is " + str(score), 35, (250, 220), GREEN)
     text3, text3r = write("Play again", 55, (250, 350), BLUE)
     screen.blit(background, (0, 0))
     screen.blit(text1, text1r)
+    screen.blit(text2, text2r)
     screen.blit(text3, text3r)
     pygame.display.flip()
     while 1:
@@ -180,8 +185,8 @@ def main():
     pygame.display.set_caption('Snake')
     clock = pygame.time.Clock()
     while 1:
-        game(screen, clock)
-        if not play_again(screen):
+        score = game(screen, clock)
+        if not play_again(screen, score):
             return
 
 if __name__ == '__main__': main()
