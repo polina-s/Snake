@@ -127,7 +127,8 @@ def main():
 
         if snake.head_coord() == apple.coord():
             snake_group.add(snake.grow())
-            apple_group.update()
+            while pygame.sprite.spritecollideany(apple, snake_group):
+                apple_group.update()
         else:
             snake.move()
 
